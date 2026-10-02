@@ -1121,6 +1121,20 @@ function rocketSpawnCFrame()
 	return CFrame.lookAt(position, position + forward, Vector3.yAxis)
 end
 
+function setRocketAnchored(record, enabled)
+	if not record or not record.Toy then
+		return
+	end
+	for _, descendant in ipairs(record.Toy:GetDescendants()) do
+		if descendant:IsA("BasePart") then
+			descendant.Anchored = enabled == true
+		end
+	end
+	if record.Toy:IsA("BasePart") then
+		record.Toy.Anchored = enabled == true
+	end
+end
+
 function stopRocketHover()
 	if FPVRocket.HoverConnection then
 		FPVRocket.HoverConnection:Disconnect()
@@ -1194,10 +1208,12 @@ function FPVRocket.Spawn()
 
 	if body then
 		requestNetworkOwnership(body.Root)
+		setRocketAnchored(body, true)
 		setRocketCollision(body, true)
 	end
 	if wings then
 		requestNetworkOwnership(wings.Root)
+		setRocketAnchored(wings, true)
 		setRocketCollision(wings, false)
 	end
 

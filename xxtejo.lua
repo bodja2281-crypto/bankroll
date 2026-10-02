@@ -111,43 +111,45 @@ l in ipairs(i)do local m,n=pcall(function()f:InvokeServer(l,d,e or Vector3.zero)
 findNewRocketToy(h,g,i,d.Position)if p then return p end until os.clock()>=o end end return nil,j or(a..' did not spawn; tried '..table.concat(i,', '))end function setRocketCollision(a,d)if not a or
 not a.Toy then return end for e,f in ipairs(a.Toy:GetDescendants())do if f:IsA('BasePart')then f.CanCollide=d==true f.CanTouch=d==true end end if a.Toy:IsA('BasePart')then a.Toy.CanCollide=d==true a.
 Toy.CanTouch=d==true end end function rocketSpawnCFrame()local a,d,e=getCharacter()local f=a and a:FindFirstChild('Head')local g=f or e if not g then return nil end local h=f and(f.Size.Y*0.5+1.15)or
-FPVRocket.SpawnHeight local i=g.Position+Vector3.new(0,h,0)local j=g.CFrame.LookVector return CFrame.lookAt(i,i+j,Vector3.yAxis)end function stopRocketHover()if FPVRocket.HoverConnection then
-FPVRocket.HoverConnection:Disconnect()FPVRocket.HoverConnection=nil end end function startRocketHover()stopRocketHover()FPVRocket.CurrentSpeed=0 FPVRocket.HoverConnection=RunService.Heartbeat:Connect(
-function()if FPVRocket.Enabled then stopRocketHover()return end local a=FPVRocket.Craft local d=rocketSpawnCFrame()if not a or not d then return end if a.Body then moveRocketToy(a.Body,d)end if a.
-Wings then moveRocketToy(a.Wings,d*CFrame.new(0,-1.45,0.7))end end)end function FPVRocket.Spawn()if FPVRocket.SpawnInProgress then return false,'spawn already in progress'end local a=FPVRocket.Enabled
-FPVRocket.SpawnInProgress=true FPVRocket.Disable(true)local d=rocketSpawnCFrame()if not d then FPVRocket.SpawnInProgress=false setRocketStatus('character is not ready','error')if a then FPVRocket.
-Disable()end return false,FPVRocket.Status end setRocketStatus('spawning BombMissile on your head...','warning')local e,f=spawnRocketToy(FPVRocket.BodyToyName,d,Vector3.new(0,0,0))setRocketStatus(
-'spawning PaperPlane wings on your head...','warning')local g,h=spawnRocketToy(FPVRocket.WingToyName,d*CFrame.new(0,-1.45,0.7),Vector3.new(0,21,0))local i=e or g if not i then FPVRocket.
-SpawnInProgress=false local j=table.concat({tostring(f or'Missile unavailable'),tostring(h or'PaperPlane unavailable')},' | ')setRocketStatus(j,'error')if a then FPVRocket.Disable()end return false,j
-end if e then requestNetworkOwnership(e.Root)setRocketCollision(e,true)end if g then requestNetworkOwnership(g.Root)setRocketCollision(g,false)end FPVRocket.Craft={Body=e,Wings=g,Primary=i}FPVRocket.
-FlightCFrame=d startRocketHover()FPVRocket.SpawnInProgress=false if e and g then setRocketStatus([[BombMissile + PaperPlane hovering on your head; enable FPV to launch]],'success')elseif g then
-setRocketStatus('PaperPlane hovering on your head; Missile is unavailable','warning')else setRocketStatus([[BombMissile hovering on your head; PaperPlane is unavailable]],'warning')end if a then
-FPVRocket.Enable()end return true,FPVRocket.Status end function restoreRocketView()pcall(function()RunService:UnbindFromRenderStep('XXtejoFPVRocket')end)if FPVRocket.InputBegan then FPVRocket.
-InputBegan:Disconnect()FPVRocket.InputBegan=nil end if FPVRocket.InputEnded then FPVRocket.InputEnded:Disconnect()FPVRocket.InputEnded=nil end table.clear(FPVRocket.Input)local a=Workspace.
-CurrentCamera local d=FPVRocket.CameraBackup if a and d then a.CameraType=d.CameraType or Enum.CameraType.Custom a.CameraSubject=d.CameraSubject a.FieldOfView=d.FieldOfView or 70 end local e=FPVRocket
-.MouseBackup if e then pcall(function()UserInputService.MouseBehavior=e.Behavior UserInputService.MouseIconEnabled=e.IconEnabled~=false end)end FPVRocket.CameraBackup=nil FPVRocket.MouseBackup=nil end
-function FPVRocket.Disable(a)FPVRocket.Enabled=false restoreRocketView()local d=Bankroll.Modules.Menu local e=d and d.Library local f=e and e.Toggles and e.Toggles.ObsidianFPVRocketControl if not a
-and f and f.Value==true and type(f.SetValue)=='function'then task.defer(function()pcall(function()f:SetValue(false)end)end)end if FPVRocket.Status and FPVRocket.Status~=''then setRocketStatus(
-'FPV control stopped','normal')end end function FPVRocket.Recenter()local a=rocketSpawnCFrame()if not a then return false end FPVRocket.FlightCFrame=a FPVRocket.CurrentSpeed=FPVRocket.Speed return
-true end function FPVRocket.Enable()if FPVRocket.Enabled then return true end local a=FPVRocket.Craft if not a or not a.Primary or not a.Primary.Root.Parent then local d=FPVRocket.Spawn()if not d then
-return false end a=FPVRocket.Craft end local d=Workspace.CurrentCamera if not d then setRocketStatus('camera is not ready','error')return false end stopRocketHover()FPVRocket.CameraBackup={CameraType=
-d.CameraType,CameraSubject=d.CameraSubject,FieldOfView=d.FieldOfView}FPVRocket.MouseBackup={Behavior=UserInputService.MouseBehavior,IconEnabled=UserInputService.MouseIconEnabled}FPVRocket.Enabled=true
-FPVRocket.CurrentSpeed=math.clamp(FPVRocket.CurrentSpeed>0 and FPVRocket.CurrentSpeed or FPVRocket.Speed,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)FPVRocket.FlightCFrame=FPVRocket.FlightCFrame or
-rocketSpawnCFrame()or a.Primary.Root.CFrame FPVRocket.NextOwnershipRefresh=0 local e={[Enum.KeyCode.W]='ThrottleUp',[Enum.KeyCode.S]='ThrottleDown',[Enum.KeyCode.A]='RollLeft',[Enum.KeyCode.D]=
-'RollRight',[Enum.KeyCode.Q]='YawLeft',[Enum.KeyCode.E]='YawRight',[Enum.KeyCode.Space]='Rise',[Enum.KeyCode.LeftControl]='Fall'}FPVRocket.InputBegan=UserInputService.InputBegan:Connect(function(f,g)
-if g or not FPVRocket.Enabled then return end if f.KeyCode==Enum.KeyCode.X then FPVRocket.Disable()return elseif f.KeyCode==Enum.KeyCode.R then FPVRocket.Recenter()return end local h=e[f.KeyCode]if h
-then FPVRocket.Input[h]=true end end)FPVRocket.InputEnded=UserInputService.InputEnded:Connect(function(f)local g=e[f.KeyCode]if g then FPVRocket.Input[g]=nil end end)pcall(function()UserInputService.
-MouseBehavior=Enum.MouseBehavior.LockCenter UserInputService.MouseIconEnabled=false end)d.CameraType=Enum.CameraType.Scriptable d.FieldOfView=88 RunService:BindToRenderStep('XXtejoFPVRocket',Enum.
-RenderPriority.Camera.Value+20,function(f)if not FPVRocket.Enabled then return end a=FPVRocket.Craft local g=a and a.Primary if not g or not g.Root or not g.Root.Parent then FPVRocket.Disable()
-setRocketStatus('rocket was removed','error')return end local h=UserInputService:GetMouseDelta()local i=math.clamp(-h.Y*FPVRocket.MouseSensitivity,-0.12,0.12)local j=math.clamp(-h.X*FPVRocket.
-MouseSensitivity,-0.14,0.14)local k=((FPVRocket.Input.YawLeft and 1 or 0)-(FPVRocket.Input.YawRight and 1 or 0))*FPVRocket.YawSpeed*f local l=((FPVRocket.Input.RollRight and 1 or 0)-(FPVRocket.Input.
-RollLeft and 1 or 0))*FPVRocket.RollSpeed*f FPVRocket.FlightCFrame=FPVRocket.FlightCFrame*CFrame.Angles(i,j+k,-l)local m=(FPVRocket.Input.ThrottleUp and 1 or 0)-(FPVRocket.Input.ThrottleDown and 1 or
-0)FPVRocket.CurrentSpeed=math.clamp(FPVRocket.CurrentSpeed+m*FPVRocket.Acceleration*f,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)local n=((FPVRocket.Input.Rise and 1 or 0)-(FPVRocket.Input.Fall and 1 or 0)
-)*FPVRocket.VerticalSpeed local o=FPVRocket.FlightCFrame.LookVector*FPVRocket.CurrentSpeed*f+Vector3.new(0,n*f,0)FPVRocket.FlightCFrame=FPVRocket.FlightCFrame+o local p=a.Body and moveRocketToy(a.Body
-,FPVRocket.FlightCFrame)local q=FPVRocket.FlightCFrame*CFrame.new(0,-1.45,0.7)local r=a.Wings and moveRocketToy(a.Wings,q)if not p and r then a.Primary=a.Wings elseif p then a.Primary=a.Body end if os
-.clock()>=FPVRocket.NextOwnershipRefresh then FPVRocket.NextOwnershipRefresh=os.clock()+2.5 if a.Body and a.Body.Root and a.Body.Root.Parent then refreshNetworkOwnership(a.Body.Root)end if a.Wings and
-a.Wings.Root and a.Wings.Root.Parent then refreshNetworkOwnership(a.Wings.Root)end end local s=(FPVRocket.FlightCFrame*CFrame.new(0,FPVRocket.CameraHeight,FPVRocket.CameraDistance)).Position local t=
-FPVRocket.FlightCFrame.Position+FPVRocket.FlightCFrame.LookVector*18 local u=CFrame.lookAt(s,t,FPVRocket.FlightCFrame.UpVector)d.CFrame=d.CFrame:Lerp(u,1-math.exp(-14*f))end)setRocketStatus(
+FPVRocket.SpawnHeight local i=g.Position+Vector3.new(0,h,0)local j=g.CFrame.LookVector return CFrame.lookAt(i,i+j,Vector3.yAxis)end function setRocketAnchored(a,d)if not a or not a.Toy then return end
+for e,f in ipairs(a.Toy:GetDescendants())do if f:IsA('BasePart')then f.Anchored=d==true end end if a.Toy:IsA('BasePart')then a.Toy.Anchored=d==true end end function stopRocketHover()if FPVRocket.
+HoverConnection then FPVRocket.HoverConnection:Disconnect()FPVRocket.HoverConnection=nil end end function startRocketHover()stopRocketHover()FPVRocket.CurrentSpeed=0 FPVRocket.HoverConnection=
+RunService.Heartbeat:Connect(function()if FPVRocket.Enabled then stopRocketHover()return end local a=FPVRocket.Craft local d=rocketSpawnCFrame()if not a or not d then return end if a.Body then
+moveRocketToy(a.Body,d)end if a.Wings then moveRocketToy(a.Wings,d*CFrame.new(0,-1.45,0.7))end end)end function FPVRocket.Spawn()if FPVRocket.SpawnInProgress then return false,
+'spawn already in progress'end local a=FPVRocket.Enabled FPVRocket.SpawnInProgress=true FPVRocket.Disable(true)local d=rocketSpawnCFrame()if not d then FPVRocket.SpawnInProgress=false setRocketStatus(
+'character is not ready','error')if a then FPVRocket.Disable()end return false,FPVRocket.Status end setRocketStatus('spawning BombMissile on your head...','warning')local e,f=spawnRocketToy(FPVRocket.
+BodyToyName,d,Vector3.new(0,0,0))setRocketStatus('spawning PaperPlane wings on your head...','warning')local g,h=spawnRocketToy(FPVRocket.WingToyName,d*CFrame.new(0,-1.45,0.7),Vector3.new(0,21,0))
+local i=e or g if not i then FPVRocket.SpawnInProgress=false local j=table.concat({tostring(f or'Missile unavailable'),tostring(h or'PaperPlane unavailable')},' | ')setRocketStatus(j,'error')if a then
+FPVRocket.Disable()end return false,j end if e then requestNetworkOwnership(e.Root)setRocketAnchored(e,true)setRocketCollision(e,true)end if g then requestNetworkOwnership(g.Root)setRocketAnchored(g,
+true)setRocketCollision(g,false)end FPVRocket.Craft={Body=e,Wings=g,Primary=i}FPVRocket.FlightCFrame=d startRocketHover()FPVRocket.SpawnInProgress=false if e and g then setRocketStatus(
+[[BombMissile + PaperPlane hovering on your head; enable FPV to launch]],'success')elseif g then setRocketStatus('PaperPlane hovering on your head; Missile is unavailable','warning')else
+setRocketStatus([[BombMissile hovering on your head; PaperPlane is unavailable]],'warning')end if a then FPVRocket.Enable()end return true,FPVRocket.Status end function restoreRocketView()pcall(
+function()RunService:UnbindFromRenderStep('XXtejoFPVRocket')end)if FPVRocket.InputBegan then FPVRocket.InputBegan:Disconnect()FPVRocket.InputBegan=nil end if FPVRocket.InputEnded then FPVRocket.
+InputEnded:Disconnect()FPVRocket.InputEnded=nil end table.clear(FPVRocket.Input)local a=Workspace.CurrentCamera local d=FPVRocket.CameraBackup if a and d then a.CameraType=d.CameraType or Enum.
+CameraType.Custom a.CameraSubject=d.CameraSubject a.FieldOfView=d.FieldOfView or 70 end local e=FPVRocket.MouseBackup if e then pcall(function()UserInputService.MouseBehavior=e.Behavior
+UserInputService.MouseIconEnabled=e.IconEnabled~=false end)end FPVRocket.CameraBackup=nil FPVRocket.MouseBackup=nil end function FPVRocket.Disable(a)FPVRocket.Enabled=false restoreRocketView()local d=
+Bankroll.Modules.Menu local e=d and d.Library local f=e and e.Toggles and e.Toggles.ObsidianFPVRocketControl if not a and f and f.Value==true and type(f.SetValue)=='function'then task.defer(function()
+pcall(function()f:SetValue(false)end)end)end if FPVRocket.Status and FPVRocket.Status~=''then setRocketStatus('FPV control stopped','normal')end end function FPVRocket.Recenter()local a=
+rocketSpawnCFrame()if not a then return false end FPVRocket.FlightCFrame=a FPVRocket.CurrentSpeed=FPVRocket.Speed return true end function FPVRocket.Enable()if FPVRocket.Enabled then return true end
+local a=FPVRocket.Craft if not a or not a.Primary or not a.Primary.Root.Parent then local d=FPVRocket.Spawn()if not d then return false end a=FPVRocket.Craft end local d=Workspace.CurrentCamera if not
+d then setRocketStatus('camera is not ready','error')return false end stopRocketHover()FPVRocket.CameraBackup={CameraType=d.CameraType,CameraSubject=d.CameraSubject,FieldOfView=d.FieldOfView}FPVRocket
+.MouseBackup={Behavior=UserInputService.MouseBehavior,IconEnabled=UserInputService.MouseIconEnabled}FPVRocket.Enabled=true FPVRocket.CurrentSpeed=math.clamp(FPVRocket.CurrentSpeed>0 and FPVRocket.
+CurrentSpeed or FPVRocket.Speed,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)FPVRocket.FlightCFrame=FPVRocket.FlightCFrame or rocketSpawnCFrame()or a.Primary.Root.CFrame FPVRocket.NextOwnershipRefresh=0
+local e={[Enum.KeyCode.W]='ThrottleUp',[Enum.KeyCode.S]='ThrottleDown',[Enum.KeyCode.A]='RollLeft',[Enum.KeyCode.D]='RollRight',[Enum.KeyCode.Q]='YawLeft',[Enum.KeyCode.E]='YawRight',[Enum.KeyCode.
+Space]='Rise',[Enum.KeyCode.LeftControl]='Fall'}FPVRocket.InputBegan=UserInputService.InputBegan:Connect(function(f,g)if g or not FPVRocket.Enabled then return end if f.KeyCode==Enum.KeyCode.X then
+FPVRocket.Disable()return elseif f.KeyCode==Enum.KeyCode.R then FPVRocket.Recenter()return end local h=e[f.KeyCode]if h then FPVRocket.Input[h]=true end end)FPVRocket.InputEnded=UserInputService.
+InputEnded:Connect(function(f)local g=e[f.KeyCode]if g then FPVRocket.Input[g]=nil end end)pcall(function()UserInputService.MouseBehavior=Enum.MouseBehavior.LockCenter UserInputService.
+MouseIconEnabled=false end)d.CameraType=Enum.CameraType.Scriptable d.FieldOfView=88 RunService:BindToRenderStep('XXtejoFPVRocket',Enum.RenderPriority.Camera.Value+20,function(f)if not FPVRocket.
+Enabled then return end a=FPVRocket.Craft local g=a and a.Primary if not g or not g.Root or not g.Root.Parent then FPVRocket.Disable()setRocketStatus('rocket was removed','error')return end local h=
+UserInputService:GetMouseDelta()local i=math.clamp(-h.Y*FPVRocket.MouseSensitivity,-0.12,0.12)local j=math.clamp(-h.X*FPVRocket.MouseSensitivity,-0.14,0.14)local k=((FPVRocket.Input.YawLeft and 1 or 0
+)-(FPVRocket.Input.YawRight and 1 or 0))*FPVRocket.YawSpeed*f local l=((FPVRocket.Input.RollRight and 1 or 0)-(FPVRocket.Input.RollLeft and 1 or 0))*FPVRocket.RollSpeed*f FPVRocket.FlightCFrame=
+FPVRocket.FlightCFrame*CFrame.Angles(i,j+k,-l)local m=(FPVRocket.Input.ThrottleUp and 1 or 0)-(FPVRocket.Input.ThrottleDown and 1 or 0)FPVRocket.CurrentSpeed=math.clamp(FPVRocket.CurrentSpeed+m*
+FPVRocket.Acceleration*f,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)local n=((FPVRocket.Input.Rise and 1 or 0)-(FPVRocket.Input.Fall and 1 or 0))*FPVRocket.VerticalSpeed local o=FPVRocket.FlightCFrame.
+LookVector*FPVRocket.CurrentSpeed*f+Vector3.new(0,n*f,0)FPVRocket.FlightCFrame=FPVRocket.FlightCFrame+o local p=a.Body and moveRocketToy(a.Body,FPVRocket.FlightCFrame)local q=FPVRocket.FlightCFrame*
+CFrame.new(0,-1.45,0.7)local r=a.Wings and moveRocketToy(a.Wings,q)if not p and r then a.Primary=a.Wings elseif p then a.Primary=a.Body end if os.clock()>=FPVRocket.NextOwnershipRefresh then FPVRocket
+.NextOwnershipRefresh=os.clock()+2.5 if a.Body and a.Body.Root and a.Body.Root.Parent then refreshNetworkOwnership(a.Body.Root)end if a.Wings and a.Wings.Root and a.Wings.Root.Parent then
+refreshNetworkOwnership(a.Wings.Root)end end local s=(FPVRocket.FlightCFrame*CFrame.new(0,FPVRocket.CameraHeight,FPVRocket.CameraDistance)).Position local t=FPVRocket.FlightCFrame.Position+FPVRocket.
+FlightCFrame.LookVector*18 local u=CFrame.lookAt(s,t,FPVRocket.FlightCFrame.UpVector)d.CFrame=d.CFrame:Lerp(u,1-math.exp(-14*f))end)setRocketStatus(
 'FPV active \u{2022} mouse steer \u{2022} W/S speed \u{2022} A/D roll \u{2022} Q/E yaw \u{2022} Space/Ctrl height \u{2022} X exit','success')return true end function FPVRocket.SetSpeed(a)FPVRocket.
 Speed=math.clamp(tonumber(a)or FPVRocket.Speed,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)if not FPVRocket.Enabled then FPVRocket.CurrentSpeed=FPVRocket.Speed end end function FPVRocket.SetSensitivity(a)
 FPVRocket.MouseSensitivity=math.clamp(tonumber(a)or 2.2,0.5,6)/1000 end function FPVRocket.SetCameraDistance(a)FPVRocket.CameraDistance=math.clamp(tonumber(a)or FPVRocket.CameraDistance,5,24)end
