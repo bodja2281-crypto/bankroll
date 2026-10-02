@@ -18,17 +18,17 @@ HideLegs=true,UseLegs=true,UseArms=false,RotationDegrees=0,Smoothness=105,Layout
 setKunaiStatus(a,b)KunaiLegs.Status=a if KunaiLegs.StatusCallback then KunaiLegs.StatusCallback(a,b or'normal')end end function updateRequiredKunaiCount()KunaiLegs.RequiredCount=(KunaiLegs.UseLegs and
 4 or 0)+(KunaiLegs.UseArms and 4 or 0)return KunaiLegs.RequiredCount end function getCharacter()local a=LocalPlayer.Character local b=a and a:FindFirstChildOfClass('Humanoid')local c=a and a:
 FindFirstChild('HumanoidRootPart')return a,b,c end function getToyFolder()local a=LocalPlayer.Name..'SpawnedInToys'local b=Workspace:FindFirstChild(a)if b then return b end local c=Workspace:
-FindFirstChild('st')return c and c:FindFirstChild(a)or nil end function getToyRoot(a)if a:IsA('BasePart')then return a end for b,c in ipairs({'Body','Main','Handle'})do local d=a:FindFirstChild(c,true
-)if d and d:IsA('BasePart')then return d end end if a:IsA('Model')and a.PrimaryPart then return a.PrimaryPart end return a:FindFirstChildWhichIsA('BasePart',true)end function getKunais()local a=
-getToyFolder()local b,c,d=getCharacter()local e={}if not a then return e end for f,g in ipairs(a:GetChildren())do if string.find(string.lower(g.Name),'kunai',1,true)then local h=getToyRoot(g)if h then
-table.insert(e,{Toy=g,Root=h})end end end if d then table.sort(e,function(f,g)return(f.Root.Position-d.Position).Magnitude<(g.Root.Position-d.Position).Magnitude end)end return e end function
-getSpawnRemote()local a=ReplicatedStorage:FindFirstChild('MenuToys')local c=a and a:FindFirstChild('SpawnToyRemoteFunction')if c and c:IsA('RemoteFunction')then return c end return nil end function
-getKunaiSpawnNames()local a={}local c={}local function d(e)if type(e)=='string'and e~=''and not c[e]then c[e]=true table.insert(a,e)end end local e=getKunais()if e[1]then d(e[1].Toy.Name)end d('Kunai'
-)local f=ReplicatedStorage:FindFirstChild('MenuToys')if f then for g,h in ipairs(f:GetDescendants())do if string.find(string.lower(h.Name),'kunai',1,true)then d(h.Name)end if h:IsA('StringValue')and
-string.find(string.lower(h.Value),'kunai',1,true)then d(h.Value)end end end return a end function getPartOwner(a)local c=a:FindFirstChild('PartOwner')if c then return c end local d=a.Parent return d
-and d:FindFirstChild('PartOwner',true)or nil end function ownershipState(a)if not a or not a.Parent or a.Anchored then return false end if type(isnetworkowner)=='function'then local c,d=pcall(
-isnetworkowner,a)if c then return d==true end end local c=getPartOwner(a)if c then if c:IsA('StringValue')then return c.Value==LocalPlayer.Name elseif c:IsA('ObjectValue')then return c.Value==
-LocalPlayer end end return nil end function requestNetworkOwnership(a)local c=ReplicatedStorage:FindFirstChild('GrabEvents')local d=c and c:FindFirstChild('SetNetworkOwner')if not d or not d:IsA(
+FindFirstChild('st')return c and c:FindFirstChild(a)or nil end function getToyRoot(a)if a:IsA('BasePart')then return a end for b,c in ipairs({'Thruster','Body','Main','Handle'})do local d=a:
+FindFirstChild(c,true)if d and d:IsA('BasePart')then return d end end if a:IsA('Model')and a.PrimaryPart then return a.PrimaryPart end return a:FindFirstChildWhichIsA('BasePart',true)end function
+getKunais()local a=getToyFolder()local b,c,d=getCharacter()local e={}if not a then return e end for f,g in ipairs(a:GetChildren())do if string.find(string.lower(g.Name),'kunai',1,true)then local h=
+getToyRoot(g)if h then table.insert(e,{Toy=g,Root=h})end end end if d then table.sort(e,function(f,g)return(f.Root.Position-d.Position).Magnitude<(g.Root.Position-d.Position).Magnitude end)end return
+e end function getSpawnRemote()local a=ReplicatedStorage:FindFirstChild('MenuToys')local c=a and a:FindFirstChild('SpawnToyRemoteFunction')if c and c:IsA('RemoteFunction')then return c end return nil
+end function getKunaiSpawnNames()local a={}local c={}local function d(e)if type(e)=='string'and e~=''and not c[e]then c[e]=true table.insert(a,e)end end local e=getKunais()if e[1]then d(e[1].Toy.Name)
+end d('Kunai')local f=ReplicatedStorage:FindFirstChild('MenuToys')if f then for g,h in ipairs(f:GetDescendants())do if string.find(string.lower(h.Name),'kunai',1,true)then d(h.Name)end if h:IsA(
+'StringValue')and string.find(string.lower(h.Value),'kunai',1,true)then d(h.Value)end end end return a end function getPartOwner(a)local c=a:FindFirstChild('PartOwner')if c then return c end local d=a
+.Parent return d and d:FindFirstChild('PartOwner',true)or nil end function ownershipState(a)if not a or not a.Parent or a.Anchored then return false end if type(isnetworkowner)=='function'then local c
+,d=pcall(isnetworkowner,a)if c then return d==true end end local c=getPartOwner(a)if c then if c:IsA('StringValue')then return c.Value==LocalPlayer.Name elseif c:IsA('ObjectValue')then return c.Value
+==LocalPlayer end end return nil end function requestNetworkOwnership(a)local c=ReplicatedStorage:FindFirstChild('GrabEvents')local d=c and c:FindFirstChild('SetNetworkOwner')if not d or not d:IsA(
 'RemoteEvent')then return true,'local follow mode'end for e=1,4 do pcall(function()d:FireServer(a,a.CFrame)end)task.wait(0.15)local f=ownershipState(a)if f==true then return true end end if
 ownershipState(a)==nil then return true end return true,'ownership requested (unverified)'end function refreshNetworkOwnership(a)local c=ReplicatedStorage:FindFirstChild('GrabEvents')local d=c and c:
 FindFirstChild('SetNetworkOwner')if d and d:IsA('RemoteEvent')and a and a.Parent then pcall(function()d:FireServer(a,a.CFrame)end)end end function KunaiLegs.SpawnMissing()if updateRequiredKunaiCount()
@@ -93,62 +93,63 @@ updateRequiredKunaiCount()local a,d,e=getCharacter()local f=getToyFolder()local 
 )local j=getKunais()local k=a and d and getTargets(a,d)or{}local l={{'game',game.PlaceId==EXPECTED_PLACE_ID},{'character',a~=nil and d~=nil and e~=nil},{'animation rig',#k>=KunaiLegs.RequiredCount},{
 'toy folder',f~=nil},{'spawn remote',g~=nil},{i and'ownership remote'or'local follow fallback',true},{string.format('physical Kunai %d/%d',math.min(#j,KunaiLegs.RequiredCount),KunaiLegs.RequiredCount)
 ,#j>=KunaiLegs.RequiredCount},{'automatic reconciler',KunaiLegs.AutoStart}}local m=0 for n,o in ipairs(l)do if o[2]then m=m+1 end end return l,m,#l end function KunaiLegs.Destroy()KunaiLegs.
-DesiredEnabled=false KunaiLegs.Enabled=false clearPhysicalAttachments()end Bankroll.Modules.KunaiLegs=KunaiLegs FPVRocket={Enabled=false,SpawnInProgress=false,BodyToyName='Missile',WingToyName=
+DesiredEnabled=false KunaiLegs.Enabled=false clearPhysicalAttachments()end Bankroll.Modules.KunaiLegs=KunaiLegs FPVRocket={Enabled=false,SpawnInProgress=false,BodyToyName='BombMissile',WingToyName=
 'PaperPlane',SpawnHeight=10,Speed=95,MinSpeed=25,MaxSpeed=240,Acceleration=85,MouseSensitivity=0.0022,RollSpeed=math.rad(105),YawSpeed=math.rad(70),VerticalSpeed=48,CameraDistance=11,CameraHeight=3.2,
 Craft=nil,FlightCFrame=nil,CurrentSpeed=0,Input={},InputBegan=nil,InputEnded=nil,StatusCallback=nil,CameraBackup=nil,MouseBackup=nil,NextOwnershipRefresh=0}function setRocketStatus(a,d)FPVRocket.
 Status=tostring(a or'')if FPVRocket.StatusCallback then FPVRocket.StatusCallback(FPVRocket.Status,d or'normal')end end function normalizeToyName(a)return string.lower(tostring(a or'')):gsub('[%s_%-]',
 '')end function rocketToyMatches(a,d)if not a then return false end local e=normalizeToyName(a.Name)local f=normalizeToyName(d)return e~=''and f~=''and(e==f or string.find(e,f,1,true)or string.find(f,
-e,1,true))end function getRocketToyCandidates(a)local d={}local e={}local function f(g)local h=normalizeToyName(g)if h~=''and not e[h]then e[h]=true table.insert(d,g)end end f(a)if normalizeToyName(a)
-=='missile'then f('Rocket')f('RocketMissile')f('MissileToy')elseif normalizeToyName(a)=='paperplane'then f('Paper Plane')f('PaperPlaneToy')end local g=ReplicatedStorage:FindFirstChild('MenuToys')if g
-then for h,i in ipairs(g:GetDescendants())do local j=i.Name if rocketToyMatches({Name=j},a)then f(j)end if i:IsA('StringValue')and rocketToyMatches({Name=i.Value},a)then f(i.Value)end end end return d
-end function findNewRocketToy(a,d,e,f)if not a then return nil end local g local h=math.huge for i,j in ipairs(a:GetChildren())do if not d[j]then local k=false for l,m in ipairs(e)do if
-rocketToyMatches(j,m)then k=true break end end if k then local l=getRocketToyRecord(j)if l then local m=(l.Root.Position-f).Magnitude if m<h then g=l h=m end end end end end return g end function
-getRocketToyRecord(a)local d=a and getToyRoot(a)if not d then return nil end local e=CFrame.new()if a:IsA('Model')then e=d.CFrame:ToObjectSpace(a:GetPivot())end return{Toy=a,Root=d,RootToPivot=e}end
-function moveRocketToy(a,d)if not a or not a.Root or not a.Root.Parent then return false end if a.Toy:IsA('Model')then a.Toy:PivotTo(d*a.RootToPivot)else a.Root.CFrame=d end a.Root.
-AssemblyLinearVelocity=d.LookVector*FPVRocket.CurrentSpeed a.Root.AssemblyAngularVelocity=Vector3.zero return true end function spawnRocketToy(a,d,e)local f=getSpawnRemote()if not f then return nil,
-'SpawnToyRemoteFunction not found'end local g={}local h=getToyFolder()if h then for i,j in ipairs(h:GetChildren())do g[j]=true end end local i=getRocketToyCandidates(a)local j for k,l in ipairs(i)do
-local m,n=pcall(function()f:InvokeServer(l,d,e or Vector3.zero)end)if not m then j=tostring(n)else local o=os.clock()+2.5 repeat task.wait(0.08)h=getToyFolder()local p=findNewRocketToy(h,g,i,d.
-Position)if p then return p end until os.clock()>=o end end return nil,j or(a..' did not spawn; tried '..table.concat(i,', '))end function setRocketCollision(a,d)if not a or not a.Toy then return end
-for e,f in ipairs(a.Toy:GetDescendants())do if f:IsA('BasePart')then f.CanCollide=d==true f.CanTouch=d==true end end if a.Toy:IsA('BasePart')then a.Toy.CanCollide=d==true a.Toy.CanTouch=d==true end
-end function rocketSpawnCFrame()local a,d,e=getCharacter()if not e then return nil end local f=e.Position+Vector3.new(0,FPVRocket.SpawnHeight,0)local g=e.CFrame.LookVector return CFrame.lookAt(f,f+g,
-Vector3.yAxis)end function FPVRocket.Spawn()if FPVRocket.SpawnInProgress then return false,'spawn already in progress'end local d=FPVRocket.Enabled FPVRocket.SpawnInProgress=true FPVRocket.Disable(
-true)local e=rocketSpawnCFrame()if not e then FPVRocket.SpawnInProgress=false setRocketStatus('character is not ready','error')if d then FPVRocket.Disable()end return false,FPVRocket.Status end
-setRocketStatus('spawning Missile above player...','warning')local f,g=spawnRocketToy(FPVRocket.BodyToyName,e,Vector3.new(0,0,0))setRocketStatus('spawning PaperPlane wings...','warning')local h,i=
-spawnRocketToy(FPVRocket.WingToyName,e*CFrame.new(0,-1.45,0.7),Vector3.new(0,21,0))local j=f or h if not j then FPVRocket.SpawnInProgress=false local k=table.concat({tostring(g or'Missile unavailable'
-),tostring(i or'PaperPlane unavailable')},' | ')setRocketStatus(k,'error')if d then FPVRocket.Disable()end return false,k end if f then requestNetworkOwnership(f.Root)setRocketCollision(f,true)end if
-h then requestNetworkOwnership(h.Root)setRocketCollision(h,false)end FPVRocket.Craft={Body=f,Wings=h,Primary=j}FPVRocket.FlightCFrame=e FPVRocket.CurrentSpeed=FPVRocket.Speed FPVRocket.SpawnInProgress
-=false if f and h then setRocketStatus('Missile + PaperPlane ready above player','success')elseif h then setRocketStatus('PaperPlane ready; Missile is unavailable','warning')else setRocketStatus(
-'Missile ready; PaperPlane is unavailable','warning')end if d then FPVRocket.Enable()end return true,FPVRocket.Status end function restoreRocketView()pcall(function()RunService:UnbindFromRenderStep(
-'XXtejoFPVRocket')end)if FPVRocket.InputBegan then FPVRocket.InputBegan:Disconnect()FPVRocket.InputBegan=nil end if FPVRocket.InputEnded then FPVRocket.InputEnded:Disconnect()FPVRocket.InputEnded=nil
-end table.clear(FPVRocket.Input)local d=Workspace.CurrentCamera local e=FPVRocket.CameraBackup if d and e then d.CameraType=e.CameraType or Enum.CameraType.Custom d.CameraSubject=e.CameraSubject d.
-FieldOfView=e.FieldOfView or 70 end local f=FPVRocket.MouseBackup if f then pcall(function()UserInputService.MouseBehavior=f.Behavior UserInputService.MouseIconEnabled=f.IconEnabled~=false end)end
-FPVRocket.CameraBackup=nil FPVRocket.MouseBackup=nil end function FPVRocket.Disable(d)FPVRocket.Enabled=false restoreRocketView()local e=Bankroll.Modules.Menu local f=e and e.Library local g=f and f.
-Toggles and f.Toggles.ObsidianFPVRocketControl if not d and g and g.Value==true and type(g.SetValue)=='function'then task.defer(function()pcall(function()g:SetValue(false)end)end)end if FPVRocket.
-Status and FPVRocket.Status~=''then setRocketStatus('FPV control stopped','normal')end end function FPVRocket.Recenter()local d=rocketSpawnCFrame()if not d then return false end FPVRocket.FlightCFrame
-=d FPVRocket.CurrentSpeed=FPVRocket.Speed return true end function FPVRocket.Enable()if FPVRocket.Enabled then return true end local d=FPVRocket.Craft if not d or not d.Primary or not d.Primary.Root.
-Parent then local e=FPVRocket.Spawn()if not e then return false end d=FPVRocket.Craft end local e=Workspace.CurrentCamera if not e then setRocketStatus('camera is not ready','error')return false end
-FPVRocket.CameraBackup={CameraType=e.CameraType,CameraSubject=e.CameraSubject,FieldOfView=e.FieldOfView}FPVRocket.MouseBackup={Behavior=UserInputService.MouseBehavior,IconEnabled=UserInputService.
-MouseIconEnabled}FPVRocket.Enabled=true FPVRocket.CurrentSpeed=math.clamp(FPVRocket.CurrentSpeed>0 and FPVRocket.CurrentSpeed or FPVRocket.Speed,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)FPVRocket.
-FlightCFrame=FPVRocket.FlightCFrame or rocketSpawnCFrame()or d.Primary.Root.CFrame FPVRocket.NextOwnershipRefresh=0 local f={[Enum.KeyCode.W]='ThrottleUp',[Enum.KeyCode.S]='ThrottleDown',[Enum.KeyCode
-.A]='RollLeft',[Enum.KeyCode.D]='RollRight',[Enum.KeyCode.Q]='YawLeft',[Enum.KeyCode.E]='YawRight',[Enum.KeyCode.Space]='Rise',[Enum.KeyCode.LeftControl]='Fall'}FPVRocket.InputBegan=UserInputService.
-InputBegan:Connect(function(g,h)if h or not FPVRocket.Enabled then return end if g.KeyCode==Enum.KeyCode.X then FPVRocket.Disable()return elseif g.KeyCode==Enum.KeyCode.R then FPVRocket.Recenter()
-return end local i=f[g.KeyCode]if i then FPVRocket.Input[i]=true end end)FPVRocket.InputEnded=UserInputService.InputEnded:Connect(function(g)local h=f[g.KeyCode]if h then FPVRocket.Input[h]=nil end
-end)pcall(function()UserInputService.MouseBehavior=Enum.MouseBehavior.LockCenter UserInputService.MouseIconEnabled=false end)e.CameraType=Enum.CameraType.Scriptable e.FieldOfView=88 RunService:
-BindToRenderStep('XXtejoFPVRocket',Enum.RenderPriority.Camera.Value+20,function(g)if not FPVRocket.Enabled then return end d=FPVRocket.Craft local h=d and d.Primary if not h or not h.Root or not h.
-Root.Parent then FPVRocket.Disable()setRocketStatus('rocket was removed','error')return end local i=UserInputService:GetMouseDelta()local j=math.clamp(-i.Y*FPVRocket.MouseSensitivity,-0.12,0.12)local
-k=math.clamp(-i.X*FPVRocket.MouseSensitivity,-0.14,0.14)local l=((FPVRocket.Input.YawLeft and 1 or 0)-(FPVRocket.Input.YawRight and 1 or 0))*FPVRocket.YawSpeed*g local m=((FPVRocket.Input.RollRight
-and 1 or 0)-(FPVRocket.Input.RollLeft and 1 or 0))*FPVRocket.RollSpeed*g FPVRocket.FlightCFrame=FPVRocket.FlightCFrame*CFrame.Angles(j,k+l,-m)local n=(FPVRocket.Input.ThrottleUp and 1 or 0)-(FPVRocket
-.Input.ThrottleDown and 1 or 0)FPVRocket.CurrentSpeed=math.clamp(FPVRocket.CurrentSpeed+n*FPVRocket.Acceleration*g,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)local o=((FPVRocket.Input.Rise and 1 or 0)-(
-FPVRocket.Input.Fall and 1 or 0))*FPVRocket.VerticalSpeed local p=FPVRocket.FlightCFrame.LookVector*FPVRocket.CurrentSpeed*g+Vector3.new(0,o*g,0)FPVRocket.FlightCFrame=FPVRocket.FlightCFrame+p local q
-=d.Body and moveRocketToy(d.Body,FPVRocket.FlightCFrame)local r=FPVRocket.FlightCFrame*CFrame.new(0,-1.45,0.7)local s=d.Wings and moveRocketToy(d.Wings,r)if not q and s then d.Primary=d.Wings elseif q
-then d.Primary=d.Body end if os.clock()>=FPVRocket.NextOwnershipRefresh then FPVRocket.NextOwnershipRefresh=os.clock()+2.5 if d.Body and d.Body.Root and d.Body.Root.Parent then
-refreshNetworkOwnership(d.Body.Root)end if d.Wings and d.Wings.Root and d.Wings.Root.Parent then refreshNetworkOwnership(d.Wings.Root)end end local t=(FPVRocket.FlightCFrame*CFrame.new(0,FPVRocket.
-CameraHeight,FPVRocket.CameraDistance)).Position local u=FPVRocket.FlightCFrame.Position+FPVRocket.FlightCFrame.LookVector*18 local v=CFrame.lookAt(t,u,FPVRocket.FlightCFrame.UpVector)e.CFrame=e.
-CFrame:Lerp(v,1-math.exp(-14*g))end)setRocketStatus('FPV active \u{2022} mouse steer \u{2022} W/S speed \u{2022} A/D roll \u{2022} Q/E yaw \u{2022} Space/Ctrl height \u{2022} X exit','success')return
-true end function FPVRocket.SetSpeed(d)FPVRocket.Speed=math.clamp(tonumber(d)or FPVRocket.Speed,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)if not FPVRocket.Enabled then FPVRocket.CurrentSpeed=FPVRocket.
-Speed end end function FPVRocket.SetSensitivity(d)FPVRocket.MouseSensitivity=math.clamp(tonumber(d)or 2.2,0.5,6)/1000 end function FPVRocket.SetCameraDistance(d)FPVRocket.CameraDistance=math.clamp(
-tonumber(d)or FPVRocket.CameraDistance,5,24)end function FPVRocket.Destroy()FPVRocket.Disable()FPVRocket.Craft=nil FPVRocket.FlightCFrame=nil FPVRocket.StatusCallback=nil end Bankroll.Modules.
-FPVRocket=FPVRocket WorldEffects={SnowEnabled=false,ShaderEnabled=false,SnowRate=140,SnowPart=nil,SnowEmitter=nil,SnowConnection=nil,Effects={},CustomShaderLoaded=false,CustomShaderUrl=
+e,1,true))end function getRocketToyCandidates(a)local d={}local e={}local function f(g)local h=normalizeToyName(g)if h~=''and not e[h]then e[h]=true table.insert(d,g)end end f(a)local g=
+normalizeToyName(a)if g=='missile'or g=='bombmissile'then f('BombMissile')f('Missile')f('Rocket')f('RocketMissile')f('MissileToy')elseif g=='paperplane'then f('Paper Plane')f('PaperPlaneToy')end local
+h=ReplicatedStorage:FindFirstChild('MenuToys')if h then for i,j in ipairs(h:GetDescendants())do local k=j.Name if rocketToyMatches({Name=k},a)then f(k)end if j:IsA('StringValue')and rocketToyMatches({
+Name=j.Value},a)then f(j.Value)end end end return d end function findNewRocketToy(a,d,e,f)if not a then return nil end local g local h=math.huge for i,j in ipairs(a:GetChildren())do if not d[j]then
+local k=false for l,m in ipairs(e)do if rocketToyMatches(j,m)then k=true break end end if k then local l=getRocketToyRecord(j)if l then local m=(l.Root.Position-f).Magnitude if m<h then g=l h=m end
+end end end end return g end function getRocketToyRecord(a)local d=a and getToyRoot(a)if not d then return nil end local e=CFrame.new()if a:IsA('Model')then e=d.CFrame:ToObjectSpace(a:GetPivot())end
+return{Toy=a,Root=d,RootToPivot=e}end function moveRocketToy(a,d)if not a or not a.Root or not a.Root.Parent then return false end if a.Toy:IsA('Model')then a.Toy:PivotTo(d*a.RootToPivot)else a.Root.
+CFrame=d end a.Root.AssemblyLinearVelocity=d.LookVector*FPVRocket.CurrentSpeed a.Root.AssemblyAngularVelocity=Vector3.zero return true end function spawnRocketToy(a,d,e)local f=getSpawnRemote()if not
+f then return nil,'SpawnToyRemoteFunction not found'end local g={}local h=getToyFolder()if h then for i,j in ipairs(h:GetChildren())do g[j]=true end end local i=getRocketToyCandidates(a)local j for k,
+l in ipairs(i)do local m,n=pcall(function()f:InvokeServer(l,d,e or Vector3.zero)end)if not m then j=tostring(n)else local o=os.clock()+2.5 repeat task.wait(0.08)h=getToyFolder()local p=
+findNewRocketToy(h,g,i,d.Position)if p then return p end until os.clock()>=o end end return nil,j or(a..' did not spawn; tried '..table.concat(i,', '))end function setRocketCollision(a,d)if not a or
+not a.Toy then return end for e,f in ipairs(a.Toy:GetDescendants())do if f:IsA('BasePart')then f.CanCollide=d==true f.CanTouch=d==true end end if a.Toy:IsA('BasePart')then a.Toy.CanCollide=d==true a.
+Toy.CanTouch=d==true end end function rocketSpawnCFrame()local a,d,e=getCharacter()if not e then return nil end local f=e.Position+Vector3.new(0,FPVRocket.SpawnHeight,0)local g=e.CFrame.LookVector
+return CFrame.lookAt(f,f+g,Vector3.yAxis)end function FPVRocket.Spawn()if FPVRocket.SpawnInProgress then return false,'spawn already in progress'end local d=FPVRocket.Enabled FPVRocket.SpawnInProgress
+=true FPVRocket.Disable(true)local e=rocketSpawnCFrame()if not e then FPVRocket.SpawnInProgress=false setRocketStatus('character is not ready','error')if d then FPVRocket.Disable()end return false,
+FPVRocket.Status end setRocketStatus('spawning Missile above player...','warning')local f,g=spawnRocketToy(FPVRocket.BodyToyName,e,Vector3.new(0,0,0))setRocketStatus('spawning PaperPlane wings...',
+'warning')local h,i=spawnRocketToy(FPVRocket.WingToyName,e*CFrame.new(0,-1.45,0.7),Vector3.new(0,21,0))local j=f or h if not j then FPVRocket.SpawnInProgress=false local k=table.concat({tostring(g or
+'Missile unavailable'),tostring(i or'PaperPlane unavailable')},' | ')setRocketStatus(k,'error')if d then FPVRocket.Disable()end return false,k end if f then requestNetworkOwnership(f.Root)
+setRocketCollision(f,true)end if h then requestNetworkOwnership(h.Root)setRocketCollision(h,false)end FPVRocket.Craft={Body=f,Wings=h,Primary=j}FPVRocket.FlightCFrame=e FPVRocket.CurrentSpeed=
+FPVRocket.Speed FPVRocket.SpawnInProgress=false if f and h then setRocketStatus('Missile + PaperPlane ready above player','success')elseif h then setRocketStatus(
+'PaperPlane ready; Missile is unavailable','warning')else setRocketStatus('Missile ready; PaperPlane is unavailable','warning')end if d then FPVRocket.Enable()end return true,FPVRocket.Status end
+function restoreRocketView()pcall(function()RunService:UnbindFromRenderStep('XXtejoFPVRocket')end)if FPVRocket.InputBegan then FPVRocket.InputBegan:Disconnect()FPVRocket.InputBegan=nil end if
+FPVRocket.InputEnded then FPVRocket.InputEnded:Disconnect()FPVRocket.InputEnded=nil end table.clear(FPVRocket.Input)local d=Workspace.CurrentCamera local e=FPVRocket.CameraBackup if d and e then d.
+CameraType=e.CameraType or Enum.CameraType.Custom d.CameraSubject=e.CameraSubject d.FieldOfView=e.FieldOfView or 70 end local f=FPVRocket.MouseBackup if f then pcall(function()UserInputService.
+MouseBehavior=f.Behavior UserInputService.MouseIconEnabled=f.IconEnabled~=false end)end FPVRocket.CameraBackup=nil FPVRocket.MouseBackup=nil end function FPVRocket.Disable(d)FPVRocket.Enabled=false
+restoreRocketView()local e=Bankroll.Modules.Menu local f=e and e.Library local g=f and f.Toggles and f.Toggles.ObsidianFPVRocketControl if not d and g and g.Value==true and type(g.SetValue)==
+'function'then task.defer(function()pcall(function()g:SetValue(false)end)end)end if FPVRocket.Status and FPVRocket.Status~=''then setRocketStatus('FPV control stopped','normal')end end function
+FPVRocket.Recenter()local d=rocketSpawnCFrame()if not d then return false end FPVRocket.FlightCFrame=d FPVRocket.CurrentSpeed=FPVRocket.Speed return true end function FPVRocket.Enable()if FPVRocket.
+Enabled then return true end local d=FPVRocket.Craft if not d or not d.Primary or not d.Primary.Root.Parent then local e=FPVRocket.Spawn()if not e then return false end d=FPVRocket.Craft end local e=
+Workspace.CurrentCamera if not e then setRocketStatus('camera is not ready','error')return false end FPVRocket.CameraBackup={CameraType=e.CameraType,CameraSubject=e.CameraSubject,FieldOfView=e.
+FieldOfView}FPVRocket.MouseBackup={Behavior=UserInputService.MouseBehavior,IconEnabled=UserInputService.MouseIconEnabled}FPVRocket.Enabled=true FPVRocket.CurrentSpeed=math.clamp(FPVRocket.CurrentSpeed
+>0 and FPVRocket.CurrentSpeed or FPVRocket.Speed,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)FPVRocket.FlightCFrame=FPVRocket.FlightCFrame or rocketSpawnCFrame()or d.Primary.Root.CFrame FPVRocket.
+NextOwnershipRefresh=0 local f={[Enum.KeyCode.W]='ThrottleUp',[Enum.KeyCode.S]='ThrottleDown',[Enum.KeyCode.A]='RollLeft',[Enum.KeyCode.D]='RollRight',[Enum.KeyCode.Q]='YawLeft',[Enum.KeyCode.E]=
+'YawRight',[Enum.KeyCode.Space]='Rise',[Enum.KeyCode.LeftControl]='Fall'}FPVRocket.InputBegan=UserInputService.InputBegan:Connect(function(g,h)if h or not FPVRocket.Enabled then return end if g.
+KeyCode==Enum.KeyCode.X then FPVRocket.Disable()return elseif g.KeyCode==Enum.KeyCode.R then FPVRocket.Recenter()return end local i=f[g.KeyCode]if i then FPVRocket.Input[i]=true end end)FPVRocket.
+InputEnded=UserInputService.InputEnded:Connect(function(g)local h=f[g.KeyCode]if h then FPVRocket.Input[h]=nil end end)pcall(function()UserInputService.MouseBehavior=Enum.MouseBehavior.LockCenter
+UserInputService.MouseIconEnabled=false end)e.CameraType=Enum.CameraType.Scriptable e.FieldOfView=88 RunService:BindToRenderStep('XXtejoFPVRocket',Enum.RenderPriority.Camera.Value+20,function(g)if not
+FPVRocket.Enabled then return end d=FPVRocket.Craft local h=d and d.Primary if not h or not h.Root or not h.Root.Parent then FPVRocket.Disable()setRocketStatus('rocket was removed','error')return end
+local i=UserInputService:GetMouseDelta()local j=math.clamp(-i.Y*FPVRocket.MouseSensitivity,-0.12,0.12)local k=math.clamp(-i.X*FPVRocket.MouseSensitivity,-0.14,0.14)local l=((FPVRocket.Input.YawLeft
+and 1 or 0)-(FPVRocket.Input.YawRight and 1 or 0))*FPVRocket.YawSpeed*g local m=((FPVRocket.Input.RollRight and 1 or 0)-(FPVRocket.Input.RollLeft and 1 or 0))*FPVRocket.RollSpeed*g FPVRocket.
+FlightCFrame=FPVRocket.FlightCFrame*CFrame.Angles(j,k+l,-m)local n=(FPVRocket.Input.ThrottleUp and 1 or 0)-(FPVRocket.Input.ThrottleDown and 1 or 0)FPVRocket.CurrentSpeed=math.clamp(FPVRocket.
+CurrentSpeed+n*FPVRocket.Acceleration*g,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)local o=((FPVRocket.Input.Rise and 1 or 0)-(FPVRocket.Input.Fall and 1 or 0))*FPVRocket.VerticalSpeed local p=FPVRocket.
+FlightCFrame.LookVector*FPVRocket.CurrentSpeed*g+Vector3.new(0,o*g,0)FPVRocket.FlightCFrame=FPVRocket.FlightCFrame+p local q=d.Body and moveRocketToy(d.Body,FPVRocket.FlightCFrame)local r=FPVRocket.
+FlightCFrame*CFrame.new(0,-1.45,0.7)local s=d.Wings and moveRocketToy(d.Wings,r)if not q and s then d.Primary=d.Wings elseif q then d.Primary=d.Body end if os.clock()>=FPVRocket.NextOwnershipRefresh
+then FPVRocket.NextOwnershipRefresh=os.clock()+2.5 if d.Body and d.Body.Root and d.Body.Root.Parent then refreshNetworkOwnership(d.Body.Root)end if d.Wings and d.Wings.Root and d.Wings.Root.Parent
+then refreshNetworkOwnership(d.Wings.Root)end end local t=(FPVRocket.FlightCFrame*CFrame.new(0,FPVRocket.CameraHeight,FPVRocket.CameraDistance)).Position local u=FPVRocket.FlightCFrame.Position+
+FPVRocket.FlightCFrame.LookVector*18 local v=CFrame.lookAt(t,u,FPVRocket.FlightCFrame.UpVector)e.CFrame=e.CFrame:Lerp(v,1-math.exp(-14*g))end)setRocketStatus(
+'FPV active \u{2022} mouse steer \u{2022} W/S speed \u{2022} A/D roll \u{2022} Q/E yaw \u{2022} Space/Ctrl height \u{2022} X exit','success')return true end function FPVRocket.SetSpeed(d)FPVRocket.
+Speed=math.clamp(tonumber(d)or FPVRocket.Speed,FPVRocket.MinSpeed,FPVRocket.MaxSpeed)if not FPVRocket.Enabled then FPVRocket.CurrentSpeed=FPVRocket.Speed end end function FPVRocket.SetSensitivity(d)
+FPVRocket.MouseSensitivity=math.clamp(tonumber(d)or 2.2,0.5,6)/1000 end function FPVRocket.SetCameraDistance(d)FPVRocket.CameraDistance=math.clamp(tonumber(d)or FPVRocket.CameraDistance,5,24)end
+function FPVRocket.Destroy()FPVRocket.Disable()FPVRocket.Craft=nil FPVRocket.FlightCFrame=nil FPVRocket.StatusCallback=nil end Bankroll.Modules.FPVRocket=FPVRocket WorldEffects={SnowEnabled=false,
+ShaderEnabled=false,SnowRate=140,SnowPart=nil,SnowEmitter=nil,SnowConnection=nil,Effects={},CustomShaderLoaded=false,CustomShaderUrl=
 [[https://raw.githubusercontent.com/randomstring0/pshade-ultimate/refs/heads/main/src/cd.lua]],CustomSkyboxEnabled=false,CustomSkyboxImage='',CustomSky=nil,OriginalSky=nil,ParticlesEnabled=false,
 ParticleMode='XXtejo butterfly',ParticleRate=140,ParticleSize=1.1,ParticleSpeed=6,ParticleBoxSize=360,ParticleHeight=48,ParticleColor=Color3.fromRGB(194,126,255),ParticleNeon=1.15,ParticleTransparency
 =0.16,AdaptiveQuality=true,TargetFPS=55,QualityScale=1,MeasuredFPS=60,EffectiveParticleRate=0,CustomParticleTexture='',BrandParticleTexture='',ParticlePart=nil,ParticleEmitter=nil,ParticleConnection=

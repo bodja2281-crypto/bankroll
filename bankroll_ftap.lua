@@ -187,7 +187,7 @@ function getToyRoot(toy)
 		return toy
 	end
 
-	for _, preferredName in ipairs({ "Body", "Main", "Handle" }) do
+	for _, preferredName in ipairs({ "Thruster", "Body", "Main", "Handle" }) do
 		local part = toy:FindFirstChild(preferredName, true)
 		if part and part:IsA("BasePart") then
 			return part
@@ -907,7 +907,7 @@ Bankroll.Modules.KunaiLegs = KunaiLegs
 FPVRocket = {
 	Enabled = false,
 	SpawnInProgress = false,
-	BodyToyName = "Missile",
+	BodyToyName = "BombMissile",
 	WingToyName = "PaperPlane",
 	SpawnHeight = 10,
 	Speed = 95,
@@ -966,11 +966,14 @@ function getRocketToyCandidates(toyName)
 	end
 
 	add(toyName)
-	if normalizeToyName(toyName) == "missile" then
+	local normalized = normalizeToyName(toyName)
+	if normalized == "missile" or normalized == "bombmissile" then
+		add("BombMissile")
+		add("Missile")
 		add("Rocket")
 		add("RocketMissile")
 		add("MissileToy")
-	elseif normalizeToyName(toyName) == "paperplane" then
+	elseif normalized == "paperplane" then
 		add("Paper Plane")
 		add("PaperPlaneToy")
 	end
@@ -14872,3 +14875,4 @@ end)
 if game.PlaceId ~= EXPECTED_PLACE_ID then
 	Menu.SetStatus("warning: this is not Fling Things and People", "warning")
 end
+
