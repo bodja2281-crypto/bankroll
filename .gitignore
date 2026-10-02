@@ -1,0 +1,17 @@
+*
+!.gitignore
+!README.md
+!SECURITY.md
+!bankroll_ftap.lua
+!loader.lua
+!bootstrap.lua
+!local_start.lua
+!.darklua.json
+!xxtejo.lua
+!ObsidianLibrary.lua
+!watermark_icon.png
+!paypal_transparent.png
+!navigation_icons.png
+!.github/
+!.github/workflows/
+!.github/workflows/protected-build.yml

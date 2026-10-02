@@ -1,0 +1,15 @@
+{
+  "generator": {
+    "name": "dense",
+    "column_span": 200
+  },
+  "rules": [
+    {
+      "rule": "rename_variables",
+      "globals": ["$default", "$roblox"],
+      "include_functions": true,
+      "detect_globals": true
+    }
+  ]
+}
+
