@@ -929,6 +929,7 @@ FPVRocket = {
 	StatusCallback = nil,
 	CameraBackup = nil,
 	MouseBackup = nil,
+	HoverConnection = nil,
 	NextOwnershipRefresh = 0,
 }
 
@@ -1108,13 +1109,45 @@ function setRocketCollision(record, enabled)
 end
 
 function rocketSpawnCFrame()
-	local _, _, characterRoot = getCharacter()
-	if not characterRoot then
+	local character, _, characterRoot = getCharacter()
+	local head = character and character:FindFirstChild("Head")
+	local anchor = head or characterRoot
+	if not anchor then
 		return nil
 	end
-	local position = characterRoot.Position + Vector3.new(0, FPVRocket.SpawnHeight, 0)
-	local forward = characterRoot.CFrame.LookVector
+	local height = head and (head.Size.Y * 0.5 + 1.15) or FPVRocket.SpawnHeight
+	local position = anchor.Position + Vector3.new(0, height, 0)
+	local forward = anchor.CFrame.LookVector
 	return CFrame.lookAt(position, position + forward, Vector3.yAxis)
+end
+
+function stopRocketHover()
+	if FPVRocket.HoverConnection then
+		FPVRocket.HoverConnection:Disconnect()
+		FPVRocket.HoverConnection = nil
+	end
+end
+
+function startRocketHover()
+	stopRocketHover()
+	FPVRocket.CurrentSpeed = 0
+	FPVRocket.HoverConnection = RunService.Heartbeat:Connect(function()
+		if FPVRocket.Enabled then
+			stopRocketHover()
+			return
+		end
+		local craft = FPVRocket.Craft
+		local hoverCFrame = rocketSpawnCFrame()
+		if not craft or not hoverCFrame then
+			return
+		end
+		if craft.Body then
+			moveRocketToy(craft.Body, hoverCFrame)
+		end
+		if craft.Wings then
+			moveRocketToy(craft.Wings, hoverCFrame * CFrame.new(0, -1.45, 0.7))
+		end
+	end)
 end
 
 function FPVRocket.Spawn()
@@ -1135,13 +1168,13 @@ function FPVRocket.Spawn()
 		return false, FPVRocket.Status
 	end
 
-	setRocketStatus("spawning Missile above player...", "warning")
+	setRocketStatus("spawning BombMissile on your head...", "warning")
 	local body, bodyError = spawnRocketToy(
 		FPVRocket.BodyToyName,
 		spawnCFrame,
 		Vector3.new(0, 0, 0)
 	)
-	setRocketStatus("spawning PaperPlane wings...", "warning")
+	setRocketStatus("spawning PaperPlane wings on your head...", "warning")
 	local wings, wingError = spawnRocketToy(
 		FPVRocket.WingToyName,
 		spawnCFrame * CFrame.new(0, -1.45, 0.7),
@@ -1174,14 +1207,14 @@ function FPVRocket.Spawn()
 		Primary = primary,
 	}
 	FPVRocket.FlightCFrame = spawnCFrame
-	FPVRocket.CurrentSpeed = FPVRocket.Speed
+	startRocketHover()
 	FPVRocket.SpawnInProgress = false
 	if body and wings then
-		setRocketStatus("Missile + PaperPlane ready above player", "success")
+		setRocketStatus("BombMissile + PaperPlane hovering on your head; enable FPV to launch", "success")
 	elseif wings then
-		setRocketStatus("PaperPlane ready; Missile is unavailable", "warning")
+		setRocketStatus("PaperPlane hovering on your head; Missile is unavailable", "warning")
 	else
-		setRocketStatus("Missile ready; PaperPlane is unavailable", "warning")
+		setRocketStatus("BombMissile hovering on your head; PaperPlane is unavailable", "warning")
 	end
 	if resumeControl then
 		FPVRocket.Enable()
@@ -1267,6 +1300,7 @@ function FPVRocket.Enable()
 		setRocketStatus("camera is not ready", "error")
 		return false
 	end
+	stopRocketHover()
 	FPVRocket.CameraBackup = {
 		CameraType = camera.CameraType,
 		CameraSubject = camera.CameraSubject,
@@ -1397,6 +1431,7 @@ end
 
 function FPVRocket.Destroy()
 	FPVRocket.Disable()
+	stopRocketHover()
 	FPVRocket.Craft = nil
 	FPVRocket.FlightCFrame = nil
 	FPVRocket.StatusCallback = nil
@@ -10569,7 +10604,7 @@ function Menu.BuildObsidian()
 	Menu.RocketSettings = Tabs.Rocket:AddRightGroupbox("Flight Settings", "settings")
 	Menu.RocketStatusLabel = addSafeLabel(
 		Menu.RocketControls,
-		FPVRocket.Status or "Ready to spawn Missile + PaperPlane above your character.",
+		FPVRocket.Status or "Ready to spawn BombMissile + PaperPlane on your head.",
 		true,
 		"ObsidianRocketStatus"
 	)
@@ -10589,7 +10624,7 @@ function Menu.BuildObsidian()
 				obsidianNotify(Library, success and "Rocket ready" or "Rocket spawn failed", message, 4)
 			end)
 		end,
-		Tooltip = "Spawns Missile and PaperPlane above your character; no fixed world coordinates.",
+		Tooltip = "Spawns BombMissile and PaperPlane on your head; enable FPV Control to launch.",
 	})
 	addSafeToggle(Menu.RocketControls, "ObsidianFPVRocketControl", {
 		Text = "FPV Control",
@@ -14875,4 +14910,5 @@ end)
 if game.PlaceId ~= EXPECTED_PLACE_ID then
 	Menu.SetStatus("warning: this is not Fling Things and People", "warning")
 end
+
 
